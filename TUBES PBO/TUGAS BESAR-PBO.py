@@ -6,11 +6,11 @@ from pygame.sprite import Sprite
 
 percepatan_biasa = 200
 Ular_Ukuran = 20
-Ular_Pinggiran = 2
-Ukuran_Persegi = Ular_Ukuran + Ular_Pinggiran
+Ular_Garis_Pinggir = 2
+Ukuran_Persegi = Ular_Ukuran + Ular_Garis_Pinggir
 X_Persegi = 42
 Y_Persegi = 24
-GAME_Pinggiran = 50
+GAME_Garis_Pinggir = 50
 Papan_Ketebalan = 2
 Papan_Lapisan = 5
 
@@ -46,7 +46,7 @@ class Segment(Sprite):
         self.image = pygame.Surface([Ular_Ukuran, Ular_Ukuran])
         self.image.fill(pygame.Color('white'))
         self.rect = self.image.get_rect(center=center)
-
+ 
 class Ular():
     def __init__(self, Panjang, mulai_center):
         self.segments = []
@@ -58,7 +58,7 @@ class Ular():
             pygame.K_LEFT: Vector2(-22, 0),
             pygame.K_RIGHT: Vector2(22, 0)
         }
-        self.processing_event = False
+        self.proses_event = False
         for i in range(Panjang):
             x = mulai_center[0] - (Ukuran_Persegi * i)
             y = mulai_center[1]
@@ -73,8 +73,8 @@ class Ular():
         return Segment((x, y))
 
     def handle_input(self, key):
-        if not self.processing_event:
-            self.processing_event = True
+        if not self.proses_event:
+            self.proses_event = True
             if key in self.Pakai_Key and not self.Pakai_Key[key] == -self.percepatan:
                 self.percepatan = self.Pakai_Key[key]
 
@@ -110,7 +110,7 @@ class Ular():
         Kepala_Baru = self.Kepala_Baru()
         self.segments.insert(0, Kepala_Baru)
         self.sprites.add(Kepala_Baru)
-        self.processing_event = False
+        self.proses_event = False
 
     def draw(self, surface):
         self.sprites.draw(surface)
@@ -141,9 +141,9 @@ class GameBerakhir(StatusDasar):
         super(GameBerakhir, self).__init__()
         self.title = self.font.render("Permainan Berakhir", True, pygame.Color("white"))
         self.title_rect = self.title.get_rect(center=self.screen_rect.center)
-        self.instructions = self.font.render("Pencet spasi untuk ke memulai kembali, atau enter untuk ke main menu", True, pygame.Color("white"))
-        instructions_center = (self.screen_rect.center[0], self.screen_rect.center[1] +  150)
-        self.instructions_rect = self.instructions.get_rect(center=instructions_center)
+        self.perintah = self.font.render("Pencet spasi untuk ke memulai kembali, atau enter untuk ke main menu", True, pygame.Color("white"))
+        perintah_center = (self.screen_rect.center[0], self.screen_rect.center[1] +  150)
+        self.perintah_rect = self.perintah.get_rect(center=perintah_center)
 
     def memulai(self, persistent):
         Skor = persistent['Skor']
@@ -159,7 +159,7 @@ class GameBerakhir(StatusDasar):
                 self.status_Selanjutnya = "MENU"
                 self.done = True
             elif event.key == pygame.K_SPACE:
-                self.status_Selanjutnya = "GAMEPLAY"
+                self.status_Selanjutnya = "GamePlay"
                 self.done = True
             elif event.key == pygame.K_ESCAPE:
                 self.quit = True
@@ -168,22 +168,22 @@ class GameBerakhir(StatusDasar):
         surface.fill(pygame.Color("black"))
         surface.blit(self.title, self.title_rect)
         surface.blit(self.final_Skor, self.final_Skor_rect)
-        surface.blit(self.instructions, self.instructions_rect)
+        surface.blit(self.perintah, self.perintah_rect)
 
-class Gameplay(StatusDasar):
+class GamePlay(StatusDasar):
     def __init__(self):
-        super(Gameplay, self).__init__()
-        self.status_Selanjutnya = "GAME_OVER"
+        super(GamePlay, self).__init__()
+        self.status_Selanjutnya = "Game_Berakhir"
         self.title_font = pygame.font.Font(None, 56)
         self.game_title_text = self.title_font.render("Cacing besar Alaska", True, pygame.Color("blue"))
-        game_title_center = (self.screen_rect.center[0], 80)
+        game_title_center = (self.screen_rect.center[0], 20)
         self.game_title_rect = self.game_title_text.get_rect(center=game_title_center)
-        game_width, game_Tinggi = pygame.display.get_surface().get_size()
-        self.x_Awal = int(GAME_Pinggiran + (Ular_Ukuran / 2))
-        self.y_Awal = int((game_Tinggi - ((Y_Persegi * Ukuran_Persegi) + GAME_Pinggiran)) + (Ular_Ukuran / 2))
+        game_Lebar, game_Tinggi = pygame.display.get_surface().get_size()
+        self.x_Awal = int(GAME_Garis_Pinggir + (Ular_Ukuran / 2))
+        self.y_Awal = int((game_Tinggi - ((Y_Persegi * Ukuran_Persegi) + GAME_Garis_Pinggir)) + (Ular_Ukuran / 2))
         self.Papan = PapanGame ((self.x_Awal, self.y_Awal))
-        x_Akhir = int(game_width - GAME_Pinggiran)
-        y_Akhir = int(game_Tinggi - GAME_Pinggiran)
+        x_Akhir = int(game_Lebar - GAME_Garis_Pinggir)
+        y_Akhir = int(game_Tinggi - GAME_Garis_Pinggir)
         self.Persegi = set()
         for x in range(self.x_Awal, x_Akhir, Ukuran_Persegi):
             for y in range(self.y_Awal, y_Akhir, Ukuran_Persegi):
@@ -233,7 +233,7 @@ class Gameplay(StatusDasar):
         surface.fill(pygame.Color("black"))
         surface.blit(self.game_title_text, self.game_title_rect)
         Skor_text = self.font.render(f"Skor : {self.Skor}", True, pygame.Color("red"))
-        surface.blit(Skor_text, (50, 90))
+        surface.blit(Skor_text, (50, 25))
         self.Papan.draw(surface)
         self.Ular.draw(surface)
         self.Makanan.draw(surface)
@@ -241,22 +241,22 @@ class Gameplay(StatusDasar):
 class Menu(StatusDasar):
     def __init__(self):
         super(Menu, self).__init__()
-        self.active_index = 0
-        self.options = ["MULAI", "KELUAR"]
-        self.status_Selanjutnya = "GAMEPLAY"
+        self.index_aktif = 0
+        self.Opsi = ["MULAI", "KELUAR"]
+        self.status_Selanjutnya = "GamePlay"
 
     def render_text(self, index):
-        color = pygame.Color("red") if index == self.active_index else pygame.Color("white")
-        return self.font.render(self.options[index], True, color)
+        color = pygame.Color("red") if index == self.index_aktif else pygame.Color("white")
+        return self.font.render(self.Opsi[index], True, color)
 
     def get_text_posisi(self, text, index):
         center = (self.screen_rect.center[0], self.screen_rect.center[1] + (index * 50))
         return text.get_rect(center=center)
 
     def handle_action(self):
-        if self.active_index == 0:
+        if self.index_aktif == 0:
             self.done = True
-        elif self.active_index == 1:
+        elif self.index_aktif == 1:
             self.quit = True
 
     def get_event(self, event):
@@ -264,15 +264,15 @@ class Menu(StatusDasar):
             self.quit = True
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_UP:
-                self.active_index = 1 if self.active_index <= 0 else 0
+                self.index_aktif = 1 if self.index_aktif <= 0 else 0
             elif event.key == pygame.K_DOWN:
-                self.active_index = 0 if self.active_index >= 1 else 1
+                self.index_aktif = 0 if self.index_aktif >= 1 else 1
             elif event.key == pygame.K_RETURN:
                 self.handle_action()
 
     def draw(self, surface):
         surface.fill(pygame.Color("black"))
-        for index, option in enumerate(self.options):
+        for index, option in enumerate(self.Opsi):
             text_render = self.render_text(index)
             surface.blit(text_render, self.get_text_posisi(text_render, index))
 
@@ -336,16 +336,17 @@ class Game(object):
             pygame.display.update()
 
 pygame.init()
-screen = pygame.display.set_mode((1024, 768))
+screen = pygame.display.set_mode((1024, 640))
 list_status = {
     "MENU": Menu(),
     "SPLASH": Splash(),
-    "GAMEPLAY": Gameplay(),
-    "GAME_OVER": GameBerakhir(),
+    "GamePlay": GamePlay(),
+    "Game_Berakhir": GameBerakhir(),
 }
 
 game = Game(screen, list_status, "SPLASH")
 game.run()
 
 pygame.quit()
+sys.exit()
 sys.exit()
